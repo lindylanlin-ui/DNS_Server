@@ -1,0 +1,18 @@
+$ORIGIN home.arpa.
+$TTL 300
+
+@       IN  SOA ns1.home.arpa. admin.home.arpa. (
+            2026070202 ; serial
+            3600       ; refresh
+            1800       ; retry
+            1209600    ; expire
+            300 )      ; minimum
+
+        IN  NS  ns1.home.arpa.
+
+ns1     IN  A   192.168.4.103
+router  IN  A   192.168.4.1
+nas     IN  A   192.168.4.20
+printer IN  A   192.168.4.30
+
+dns     IN  CNAME ns1.home.arpa.

@@ -1,0 +1,27 @@
+# Internal zone: answer only for records we define in home.arpa.
+# All other queries are forwarded to the external resolvers below.
+home.arpa:53 {
+    errors
+    file /etc/coredns/zones/db.home.arpa
+    cache 300
+    reload
+}
+
+.:53 {
+    errors
+    health
+    ready
+    hosts {
+        192.168.4.103 tuffy.myddns.me
+        fallthrough
+    }
+    forward . 168.95.1.1 1.1.1.1 8.8.8.8 {
+        policy sequential
+        health_check 5s
+        max_fails 2
+    }
+    cache 300
+    loop
+    reload
+    loadbalance
+}

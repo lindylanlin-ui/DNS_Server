@@ -1,0 +1,21 @@
+services:
+  coredns:
+    image: coredns/coredns:1.14.4
+    container_name: internal-dns
+    restart: unless-stopped
+    cap_add:
+      - NET_BIND_SERVICE
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    ports:
+      - "${DNS_BIND_IP:-127.0.0.1}:53:53/udp"
+      - "${DNS_BIND_IP:-127.0.0.1}:53:53/tcp"
+    volumes:
+      - ./coredns/Corefile:/etc/coredns/Corefile:ro
+      - ./coredns/zones:/etc/coredns/zones:ro
+    command:
+      - -conf
+      - /etc/coredns/Corefile
