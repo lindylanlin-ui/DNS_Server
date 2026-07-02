@@ -12,7 +12,8 @@ $TTL 300
 
 ns1     IN  A   192.168.4.103
 router  IN  A   192.168.4.1
-nas     IN  A   192.168.4.20
-printer IN  A   192.168.4.30
+nas     IN  A   192.168.4.112
+tuffy   IN  A   192.168.4.105
+debera  IN  A   192.168.4.105
 
 dns     IN  CNAME ns1.home.arpa.
