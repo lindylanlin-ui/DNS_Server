@@ -1,0 +1,11 @@
+/home/tuffy/project/DNS_Server/logs/coredns.log {
+    su tuffy tuffy
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    dateext
+    copytruncate
+}

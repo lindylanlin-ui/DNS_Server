@@ -1,3 +1,6 @@
 .env
+logs/*.log
+logs/*.log-*
+logs/*.gz
 *.log
 .DS_Store

@@ -2,6 +2,7 @@
 # All other queries are forwarded to the external resolvers below.
 home.arpa:53 {
     errors
+    log . "{remote}:{port} - {>id} \"{type} {name} {proto}\" {rcode} {>rflags} {rsize} {duration}"
     file /etc/coredns/zones/db.home.arpa
     cache 300
     reload
@@ -9,6 +10,7 @@ home.arpa:53 {
 
 .:53 {
     errors
+    log . "{remote}:{port} - {>id} \"{type} {name} {proto}\" {rcode} {>rflags} {rsize} {duration}"
     health
     ready
     hosts {

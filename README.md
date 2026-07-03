@@ -18,7 +18,7 @@
   - `1.1.1.1`
   - `8.8.8.8`
 - 只把本機綁定 IP 放在 `.env`，避免直接提交到 GitHub
-- 預設不開啟查詢日誌，降低隱私外洩風險
+- 預設會把 DNS 查詢寫到 Docker logs，方便排查裝置解析問題
 
 **適合的使用情境**
 
@@ -30,9 +30,12 @@
 **檔案導覽**
 
 - [Compose 設定](./docker-compose.yml)
+- [Docker Image](./Dockerfile)
 - [CoreDNS 主設定](./coredns/Corefile)
 - [內部網域 zone](./coredns/zones/db.home.arpa)
 - [本機範例環境變數](./.env.example)
+- [本機 log 目錄](./logs)
+- [logrotate 設定](./logrotate/dns_server_coredns)
 
 **快速開始**
 
@@ -306,7 +309,7 @@ docker compose restart
 
 - 不要提交 `.env`
 - 如果你不想公開內網 IP，提交前請檢查 `coredns/zones/db.home.arpa`
-- 預設沒有開啟 query log，可減少使用者查詢紀錄外流
+- 目前已開啟 query log，排查完成後若有隱私需求可再關閉
 - Docker 容器採唯讀檔案系統，並移除多數不必要能力
 - 建議在主機防火牆或路由器 ACL 限制只有內網可存取 `53/tcp` 與 `53/udp`
 - `home.arpa` 內未定義的名稱不會被轉送到外部 DNS
@@ -338,8 +341,42 @@ docker compose ps
 - 查看日誌：
 
 ```bash
-docker compose logs -f
+tail -f logs/coredns.log
 ```
+
+- 專案資料夾內的 log 檔：
+
+```bash
+tail -f logs/coredns.log
+```
+
+- 如果你搬到新環境，先確認 `logs/coredns.log` 已存在；某些 Docker 安裝方式會允許 append 既有檔案，但不允許在 bind mount 目錄內由容器直接建立新檔
+
+- 目前 Docker 的 `logging.driver` 已設成 `none`
+- 也就是容器 stdout/stderr 不再另外存成 Docker 自己的 `json-file`
+- 這個服務的 log 以 `logs/coredns.log` 為主
+- `logrotate` 會每日輪替 `logs/coredns.log`，保留 14 份並壓縮舊檔
+- 系統實際使用的規則檔位於 `/etc/logrotate.d/dns_server-coredns`
+- 如果你修改 repo 內的 `logrotate/dns_server_coredns`，記得重新安裝：
+
+```bash
+sudo install -o root -g root -m 644 logrotate/dns_server_coredns /etc/logrotate.d/dns_server-coredns
+```
+
+- 測試查詢並同步看日誌：
+
+```bash
+dig @192.168.4.103 openai.com
+tail -n 20 logs/coredns.log
+```
+
+- 如果 iPhone 或紅米平板查不到，但 log 完全沒有新紀錄：
+  - 代表裝置沒有把這台 `192.168.4.103` 當成 DNS
+  - 先檢查 Wi-Fi 的 DNS 設定、路由器 DHCP 發出去的 DNS、Android 的私人 DNS、iPhone 是否還在用其他 DNS
+
+- 如果 log 有進來但回 `SERVFAIL`：
+  - 代表請求有到 CoreDNS，但外部轉送或上游解析出了問題
+  - 這時再看 `errors` 訊息，通常能看到 timeout 或 upstream 失敗原因
 
 - 重啟服務：
 

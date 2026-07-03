@@ -1,6 +1,9 @@
 services:
   coredns:
-    image: coredns/coredns:1.14.4
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dns_server-coredns:local
     container_name: internal-dns
     restart: unless-stopped
     cap_add:
@@ -8,6 +11,8 @@ services:
     cap_drop:
       - ALL
     read_only: true
+    logging:
+      driver: none
     tmpfs:
       - /tmp
     ports:
@@ -16,6 +21,6 @@ services:
     volumes:
       - ./coredns/Corefile:/etc/coredns/Corefile:ro
       - ./coredns/zones:/etc/coredns/zones:ro
+      - ./logs:/var/log/coredns
     command:
-      - -conf
-      - /etc/coredns/Corefile
+      - exec /coredns -conf /etc/coredns/Corefile >> /var/log/coredns/coredns.log 2>&1
