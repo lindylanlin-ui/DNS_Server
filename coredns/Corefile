@@ -14,7 +14,7 @@ home.arpa:53 {
     health
     ready
     hosts {
-        192.168.4.103 tuffy.myddns.me
+        192.168.4.103 tuffy.myddns.me www.tuffy-lin.com tuffy-lin.com
         fallthrough
     }
     forward . 168.95.1.1 1.1.1.1 8.8.8.8 {
